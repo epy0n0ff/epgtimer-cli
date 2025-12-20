@@ -1,0 +1,13 @@
+curl 'http://192.168.1.11:5510/api/SetAutoAdd?id=0' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: ja,en-US;q=0.9,en;q=0.8' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+  -H 'Origin: http://192.168.1.11:5510' \
+  -H 'Pragma: no-cache' \
+  -H 'Referer: http://192.168.1.11:5510/EMWUI/autoaddepg.html?page=5' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
+  -H 'X-Requested-With: XMLHttpRequest' \
+  --data-raw 'addchg=1&andKey=%E3%82%8F%E3%81%9F%E3%81%97%E3%81%8C%E6%81%8B%E4%BA%BA%E3%81%AB%E3%81%AA%E3%82%8C%E3%82%8B%E3%82%8F%E3%81%91&notKey=%E6%8E%A8%E3%81%97%E3%82%A8%E3%83%B3%E3%82%BF&titleOnlyFlag=1&serviceList=&serviceList=32736-32736-1024&serviceList=32736-32736-1025&serviceList=32737-32737-1032&serviceList=32737-32737-1033&serviceList=32737-32737-1034&serviceList=32738-32738-1040&serviceList=32738-32738-1041&serviceList=32739-32739-1048&serviceList=32739-32739-1049&serviceList=32740-32740-1056&serviceList=32740-32740-1057&serviceList=32740-32740-1058&serviceList=32741-32741-1064&serviceList=32741-32741-1065&serviceList=32741-32741-1066&serviceList=32742-32742-1072&serviceList=32742-32742-1073&serviceList=32742-32742-1074&serviceList=32391-32391-23608&serviceList=32391-32391-23609&serviceList=32391-32391-23610&serviceList=32397-32397-23656&serviceList=32397-32397-23657&serviceList=32399-32399-23672&serviceList=32399-32399-23673&serviceList=32375-32375-24633&serviceList=32375-32375-24634&serviceList=4-16625-101&serviceList=4-16625-102&serviceList=4-16625-103&serviceList=4-16592-141&serviceList=4-16592-142&serviceList=4-16592-143&serviceList=4-16400-151&serviceList=4-16400-152&serviceList=4-16400-153&serviceList=4-16401-161&serviceList=4-16401-162&serviceList=4-16401-163&serviceList=4-16402-171&serviceList=4-16402-172&serviceList=4-16402-173&serviceList=4-16593-181&serviceList=4-16593-182&serviceList=4-16593-183&serviceList=4-16528-211&serviceList=4-16530-222&serviceList=4-18098-231&serviceList=4-18098-232&serviceList=4-18130-236&serviceList=4-18803-260&dayList=on&startTime=00%3A00&endTime=01%3A00&dateList=&freeCAFlag=0&chkDurationMin=0&chkDurationMax=0&chkRecDay=6&presetID=65535&onid=&tsid=&sid=&eid=&ctok=98357b8eedf096855c1cb636303ab2af&recMode=1&tuijyuuFlag=1&priority=2&useDefMarginFlag=1&serviceMode=1&tunerID=0&suspendMode=0&batFilePath=&batFileTag=' \
+  --insecure
