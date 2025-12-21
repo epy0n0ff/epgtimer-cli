@@ -38,6 +38,9 @@ func Execute() {
 func init() {
 	// Global flags can be added here
 	rootCmd.PersistentFlags().StringP("endpoint", "e", "", "EMWUI server endpoint (overrides EMWUI_ENDPOINT env var)")
+
+	// Register subcommands
+	rootCmd.AddCommand(listCmd)
 }
 
 // GetEMWUIEndpoint returns the EMWUI endpoint from flag or environment variable

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -11,9 +13,12 @@ import (
 type MockEMWUIServer struct {
 	Server *httptest.Server
 	// Callbacks for custom behavior
-	OnSetAutoAdd func(values map[string][]string) (success bool, message string)
+	OnSetAutoAdd  func(values map[string][]string) (success bool, message string)
+	OnEnumAutoAdd func() (xmlResponse string, statusCode int)
 	// CSRF token to return in HTML page
 	CToken string
+	// EnumAutoAdd response mode
+	EnumAutoAddEmpty bool // If true, return empty response
 }
 
 // NewMockEMWUIServer creates a new mock EMWUI server
@@ -38,6 +43,57 @@ func NewMockEMWUIServer() *MockEMWUIServer {
 </body>
 </html>`, mock.CToken)
 			fmt.Fprint(w, html)
+			return
+		}
+
+		// Handle EnumAutoAdd endpoint (GET /api/EnumAutoAdd)
+		if r.URL.Path == "/api/EnumAutoAdd" {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Call custom handler if set
+			if mock.OnEnumAutoAdd != nil {
+				xmlResp, statusCode := mock.OnEnumAutoAdd()
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				w.WriteHeader(statusCode)
+				fmt.Fprint(w, xmlResp)
+				return
+			}
+
+			// Default behavior: load from fixtures
+			var filename string
+			if mock.EnumAutoAddEmpty {
+				filename = "enumautoadd_empty.xml"
+			} else {
+				filename = "enumautoadd_success.xml"
+			}
+
+			// Try multiple possible paths for fixture files
+			var xmlData []byte
+			var err error
+			possiblePaths := []string{
+				filepath.Join("responses", filename),
+				filepath.Join("testdata", "responses", filename),
+				filepath.Join("tests", "testdata", "responses", filename),
+				filepath.Join("..", "testdata", "responses", filename),
+			}
+
+			for _, path := range possiblePaths {
+				xmlData, err = os.ReadFile(path)
+				if err == nil {
+					break
+				}
+			}
+
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Failed to read fixture: %v", err), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+			w.Write(xmlData)
 			return
 		}
 
@@ -124,4 +180,16 @@ func NewHTMLServer() *httptest.Server {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, "<html><body>EMWUI Web Interface</body></html>")
 	}))
+}
+
+// NewEmptyEnumAutoAddServer creates a mock server that returns empty EnumAutoAdd response
+func NewEmptyEnumAutoAddServer() *MockEMWUIServer {
+	mock := NewMockEMWUIServer()
+	mock.EnumAutoAddEmpty = true
+	return mock
+}
+
+// SetEnumAutoAddHandler sets a custom handler for EnumAutoAdd requests
+func (m *MockEMWUIServer) SetEnumAutoAddHandler(handler func() (xmlResponse string, statusCode int)) {
+	m.OnEnumAutoAdd = handler
 }
