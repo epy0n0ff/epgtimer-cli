@@ -5,6 +5,8 @@ Command-line interface for EpgTimer's EMWUI to manage automatic recording rules 
 ## Features
 
 - Add automatic recording rules based on search keywords
+- List and filter existing recording rules
+- Export rules to JSON, CSV, or TSV format
 - Support for Japanese keywords and channel names
 - Exclusion keywords to filter out unwanted programs
 - Multiple channel selection
@@ -64,52 +66,84 @@ set EMWUI_ENDPOINT=http://localhost:5510
 
 ## Usage
 
-### Basic Command
+### Commands
+
+#### Add Recording Rule
+
+Add a new automatic recording rule:
 
 ```bash
 epgtimer add --andKey "search keywords" --serviceList "ONID-TSID-SID"
 ```
 
-### Examples
+**Options**:
+- `--andKey` (required): Search keywords - programs must contain these keywords in the title
+- `--notKey` (optional): Exclusion keywords - programs must NOT contain these keywords
+- `--serviceList` (required): Comma-separated list of channels in "ONID-TSID-SID" format
+- `--endpoint` (optional): Override EMWUI_ENDPOINT environment variable
 
-#### Example 1: Record all news programs on NHK
+**Examples**:
 
 ```bash
+# Record all news programs on NHK
 epgtimer add --andKey "ニュース" --serviceList "32736-32736-1024"
-```
 
-#### Example 2: Record dramas, excluding reruns
-
-```bash
+# Record dramas, excluding reruns
 epgtimer add \
   --andKey "ドラマ" \
   --notKey "再放送" \
   --serviceList "32736-32736-1024,32737-32737-1032,32738-32738-1040"
-```
 
-#### Example 3: Record movies on multiple channels
-
-```bash
-epgtimer add \
-  --andKey "映画" \
-  --serviceList "32736-32736-1024,32736-32736-1025,32737-32737-1032,32738-32738-1040"
-```
-
-#### Example 4: Record specific show with exclusions
-
-```bash
+# Record specific show with exclusions
 epgtimer add \
   --andKey "わたしが恋人になれるわけ" \
   --notKey "推しエンタ" \
   --serviceList "32736-32736-1024,32736-32736-1025"
 ```
 
-### Command Options
+#### List Recording Rules
 
-- `--andKey` (required): Search keywords - programs must contain these keywords in the title
-- `--notKey` (optional): Exclusion keywords - programs must NOT contain these keywords
-- `--serviceList` (required): Comma-separated list of channels in "ONID-TSID-SID" format
-- `--endpoint` (optional): Override EMWUI_ENDPOINT environment variable
+View and filter existing automatic recording rules:
+
+```bash
+epgtimer list [flags]
+```
+
+**Filter Options**:
+- `--andKey`: Filter by search keyword (substring match, case-insensitive)
+- `--channel`: Filter by channel (ONID-TSID-SID format)
+- `--enabled`: Show only enabled rules
+- `--disabled`: Show only disabled rules
+- `--regex`: Show only regex-enabled rules
+
+**Export Options**:
+- `--format`: Output format - table (default), json, csv, tsv
+- `-o, --output`: Output file path (default: stdout)
+
+**Examples**:
+
+```bash
+# List all rules (table format)
+epgtimer list
+
+# Filter by keyword
+epgtimer list --andKey "ニュース"
+
+# Show only enabled rules
+epgtimer list --enabled
+
+# Combine filters
+epgtimer list --enabled --andKey "ドラマ"
+
+# Export all rules to JSON file
+epgtimer list --format json --output rules.json
+
+# Export filtered rules to CSV
+epgtimer list --enabled --format csv -o enabled_rules.csv
+
+# Output as TSV to stdout
+epgtimer list --format tsv
+```
 
 ## Common Channel IDs (Tokyo Area)
 
@@ -137,6 +171,7 @@ View all available options:
 ```bash
 epgtimer --help
 epgtimer add --help
+epgtimer list --help
 epgtimer --version
 ```
 
@@ -201,9 +236,10 @@ make test-coverage
 epgtimer-cli/
 ├── cmd/epgtimer/          # Main entry point
 ├── internal/
-│   ├── models/            # Data models
+│   ├── models/            # Data models (rules, filters)
 │   ├── client/            # HTTP client for EMWUI API
-│   └── commands/          # CLI commands
+│   ├── commands/          # CLI commands (add, list)
+│   └── formatters/        # Output formatters (table, JSON, CSV, TSV)
 ├── tests/
 │   ├── integration/       # Integration tests
 │   └── testdata/          # Test fixtures and mock server
@@ -216,10 +252,14 @@ epgtimer-cli/
 
 - **Language**: Go 1.24
 - **CLI Framework**: Cobra
-- **API**: EMWUI SetAutoAdd endpoint
+- **API Endpoints**:
+  - EMWUI SetAutoAdd - Add automatic recording rules
+  - EMWUI EnumAutoAdd - List and retrieve recording rules
 - **Character Encoding**: UTF-8 (automatic URL encoding)
 - **HTTP Timeout**: 10 seconds
 - **CSRF Protection**: Automatically fetches ctok token from `/EMWUI/autoaddepg.html` before each request
+- **Export Formats**: JSON, CSV, TSV with UTF-8 support
+- **Filtering**: Client-side filtering with AND logic for multiple criteria
 
 ## Contributing
 
@@ -239,5 +279,5 @@ Contributions are welcome! Please ensure:
 
 ---
 
-**Version**: 0.1.0
-**Last Updated**: 2025-12-20
+**Version**: 0.2.0
+**Last Updated**: 2025-12-21
