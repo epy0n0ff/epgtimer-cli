@@ -113,3 +113,94 @@ func (r *RecordingSettings) HasMargins() bool {
 func (r *RecordingSettings) UsesCustomTuner() bool {
 	return r.TunerID > 0
 }
+
+// EnumReserveInfoResponse represents the response from EMWUI EnumReserveInfo API
+type EnumReserveInfoResponse struct {
+	XMLName xml.Name          `xml:"entry"`
+	Total   int               `xml:"total"`
+	Index   int               `xml:"index"`
+	Count   int               `xml:"count"`
+	Items   []ReservationInfo `xml:"items>reserveinfo"`
+}
+
+// ReservationInfo represents a single reservation from EnumReserveInfo API
+type ReservationInfo struct {
+	ID             int        `xml:"ID" json:"id"`
+	Title          string     `xml:"title" json:"title"`
+	StartDate      string     `xml:"startDate" json:"start_date"`      // Format: 2025/12/22
+	StartTime      string     `xml:"startTime" json:"start_time"`      // Format: 22:30:00
+	DurationSecond int        `xml:"durationSecond" json:"duration_second"`
+	StationName    string     `xml:"stationName" json:"station_name"`
+	ONID           int        `xml:"ONID" json:"onid"`
+	TSID           int        `xml:"TSID" json:"tsid"`
+	SID            int        `xml:"SID" json:"sid"`
+	EventID        int        `xml:"eventID" json:"event_id"`
+	Comment        string     `xml:"comment" json:"comment"`
+	RecSetting     RecSetting `xml:"recSetting" json:"rec_setting"`
+}
+
+// RecSetting represents recording settings for a reservation
+type RecSetting struct {
+	RecMode          int              `xml:"recMode" json:"rec_mode"`
+	Priority         int              `xml:"priority" json:"priority"`
+	TuijyuuFlag      int              `xml:"tuijyuuFlag" json:"tuijyuu_flag"`
+	ServiceMode      int              `xml:"serviceMode" json:"service_mode"`
+	PittariFlag      int              `xml:"pittariFlag" json:"pittari_flag"`
+	BatFilePath      string           `xml:"batFilePath" json:"bat_file_path"`
+	SuspendMode      int              `xml:"suspendMode" json:"suspend_mode"`
+	RebootFlag       int              `xml:"rebootFlag" json:"reboot_flag"`
+	StartMargin      int              `xml:"startMargin" json:"start_margin"`
+	EndMargin        int              `xml:"endMargin" json:"end_margin"`
+	ContinueRecFlag  int              `xml:"continueRecFlag" json:"continue_rec_flag"`
+	PartialRecFlag   int              `xml:"partialRecFlag" json:"partial_rec_flag"`
+	TunerID          int              `xml:"tunerID" json:"tuner_id"`
+	RecFolderList    RecFolderList    `xml:"recFolderList" json:"rec_folder_list"`
+	PartialRecFolder PartialRecFolder `xml:"partialRecFolder" json:"partial_rec_folder"`
+}
+
+// RecFolderList represents the list of recording folders
+type RecFolderList struct {
+	RecFolders []RecFolder `xml:"recFolderInfo" json:"rec_folders"`
+}
+
+// RecFolder represents a single recording folder
+type RecFolder struct {
+	RecFolder     string `xml:"recFolder" json:"rec_folder"`
+	WritePlugIn   string `xml:"writePlugIn" json:"write_plugin"`
+	RecNamePlugIn string `xml:"recNamePlugIn" json:"rec_name_plugin"`
+}
+
+// PartialRecFolder represents partial recording folder settings
+type PartialRecFolder struct {
+	RecFolder     string `xml:"recFolder" json:"rec_folder"`
+	WritePlugIn   string `xml:"writePlugIn" json:"write_plugin"`
+	RecNamePlugIn string `xml:"recNamePlugIn" json:"rec_name_plugin"`
+}
+
+// ChannelID returns the channel identifier in ONID-TSID-SID format
+func (r *ReservationInfo) ChannelID() string {
+	return fmt.Sprintf("%d-%d-%d", r.ONID, r.TSID, r.SID)
+}
+
+// DurationMinutes returns the duration in minutes
+func (r *ReservationInfo) DurationMinutes() int {
+	return r.DurationSecond / 60
+}
+
+// RecModeString returns a human-readable recording mode
+func (r *ReservationInfo) RecModeString() string {
+	switch r.RecSetting.RecMode {
+	case 0:
+		return "All"
+	case 1:
+		return "Video"
+	case 2:
+		return "Audio"
+	case 3:
+		return "Caption"
+	case 4:
+		return "Data"
+	default:
+		return fmt.Sprintf("Mode%d", r.RecSetting.RecMode)
+	}
+}

@@ -6,7 +6,10 @@ Command-line interface for EpgTimer's EMWUI to manage automatic recording rules 
 
 - Add automatic recording rules based on search keywords
 - List and filter existing recording rules
-- Export rules to JSON, CSV, or TSV format
+- View available channels with filtering by type and network
+- List manual reservations with filtering
+- Browse recorded programs with filtering
+- Export to JSON, CSV, or TSV format
 - Support for Japanese keywords and channel names
 - Exclusion keywords to filter out unwanted programs
 - Multiple channel selection
@@ -145,6 +148,131 @@ epgtimer list --enabled --format csv -o enabled_rules.csv
 epgtimer list --format tsv
 ```
 
+#### List Channels
+
+View and filter available channels/services configured in EpgTimer:
+
+```bash
+epgtimer channels [flags]
+```
+
+**Filter Options**:
+- `--tv`: Show only TV channels (service_type=1)
+- `--radio`: Show only radio channels (service_type=2)
+- `--data`: Show only data channels (service_type=192)
+- `--network`: Filter by network name (substring match, case-insensitive)
+- `--name`: Filter by channel name (substring match, case-insensitive)
+
+**Export Options**:
+- `--format`: Output format - table (default), json, csv, tsv
+- `-o, --output`: Output file path (default: stdout)
+
+**Examples**:
+
+```bash
+# List all channels
+epgtimer channels
+
+# Show only TV channels
+epgtimer channels --tv
+
+# Show only radio channels
+epgtimer channels --radio
+
+# Filter by network
+epgtimer channels --network "BS Digital"
+
+# Filter by channel name
+epgtimer channels --name "NHK"
+
+# Export to JSON file
+epgtimer channels --format json --output channels.json
+
+# Export TV channels to CSV
+epgtimer channels --tv --format csv -o tv_channels.csv
+```
+
+#### List Reservations
+
+View and filter manual recording reservations:
+
+```bash
+epgtimer reservations [flags]
+```
+
+**Filter Options**:
+- `--title`: Filter by program title (substring match, case-insensitive)
+- `--station`: Filter by station name (substring match, case-insensitive)
+- `--channel`: Filter by channel ID (exact match, format: ONID-TSID-SID)
+
+**Export Options**:
+- `--format`: Output format - table (default), json, csv, tsv
+- `-o, --output`: Output file path (default: stdout)
+
+**Examples**:
+
+```bash
+# List all reservations
+epgtimer reservations
+
+# Filter by title
+epgtimer reservations --title "ニュース"
+
+# Filter by station
+epgtimer reservations --station "NHK"
+
+# Filter by specific channel
+epgtimer reservations --channel "32736-32736-1024"
+
+# Export to JSON file
+epgtimer reservations --format json --output reservations.json
+
+# Export to CSV
+epgtimer reservations --format csv -o reservations.csv
+```
+
+#### List Recordings
+
+View and filter recorded programs:
+
+```bash
+epgtimer recordings [flags]
+```
+
+**Filter Options**:
+- `--title`: Filter by program title (substring match, case-insensitive)
+- `--station`: Filter by station name (substring match, case-insensitive)
+- `--channel`: Filter by channel ID (exact match, format: ONID-TSID-SID)
+- `--protected`: Show only protected recordings
+
+**Export Options**:
+- `--format`: Output format - table (default), json, csv, tsv
+- `-o, --output`: Output file path (default: stdout)
+
+**Note**: The API returns recordings in paginated batches (200 items per request). This command retrieves only the first batch by default.
+
+**Examples**:
+
+```bash
+# List recordings
+epgtimer recordings
+
+# Filter by title
+epgtimer recordings --title "ニュース"
+
+# Filter by station
+epgtimer recordings --station "NHK"
+
+# Show only protected recordings
+epgtimer recordings --protected
+
+# Export to JSON file
+epgtimer recordings --format json --output recordings.json
+
+# Export to CSV
+epgtimer recordings --format csv -o recordings.csv
+```
+
 ## Common Channel IDs (Tokyo Area)
 
 | Channel | ONID-TSID-SID |
@@ -172,6 +300,9 @@ View all available options:
 epgtimer --help
 epgtimer add --help
 epgtimer list --help
+epgtimer channels --help
+epgtimer reservations --help
+epgtimer recordings --help
 epgtimer --version
 ```
 
@@ -255,6 +386,9 @@ epgtimer-cli/
 - **API Endpoints**:
   - EMWUI SetAutoAdd - Add automatic recording rules
   - EMWUI EnumAutoAdd - List and retrieve recording rules
+  - EMWUI EnumService - List available channels/services
+  - EMWUI EnumReserveInfo - List manual recording reservations
+  - EMWUI EnumRecInfo - List recorded programs (paginated)
 - **Character Encoding**: UTF-8 (automatic URL encoding)
 - **HTTP Timeout**: 10 seconds
 - **CSRF Protection**: Automatically fetches ctok token from `/EMWUI/autoaddepg.html` before each request
@@ -279,5 +413,5 @@ Contributions are welcome! Please ensure:
 
 ---
 
-**Version**: 0.2.0
-**Last Updated**: 2025-12-21
+**Version**: 0.3.0
+**Last Updated**: 2025-12-22
