@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<entry>
+  <total>3</total>
+  <index>0</index>
+  <count>3</count>
+  <items>
+    <serviceinfo>
+      <ONID>32736</ONID>
+      <TSID>32736</TSID>
+      <SID>1024</SID>
+      <service_type>1</service_type>
+      <partialReceptionFlag>0</partialReceptionFlag>
+      <service_provider_name>NHK</service_provider_name>
+      <service_name>NHK総合・東京</service_name>
+      <network_name>地上デジタル</network_name>
+      <ts_name>NHK総合・東京</ts_name>
+      <remote_control_key_id>1</remote_control_key_id>
+    </serviceinfo>
+    <serviceinfo>
+      <ONID>4</ONID>
+      <TSID>16400</TSID>
+      <SID>151</SID>
+      <service_type>1</service_type>
+      <partialReceptionFlag>0</partialReceptionFlag>
+      <service_provider_name>BS朝日</service_provider_name>
+      <service_name>BS朝日</service_name>
+      <network_name>BS Digital</network_name>
+      <ts_name>BS朝日</ts_name>
+      <remote_control_key_id>5</remote_control_key_id>
+    </serviceinfo>
+    <serviceinfo>
+      <ONID>32737</ONID>
+      <TSID>32737</TSID>
+      <SID>1032</SID>
+      <service_type>2</service_type>
+      <partialReceptionFlag>0</partialReceptionFlag>
+      <service_provider_name>NHK</service_provider_name>
+      <service_name>NHKラジオ第1</service_name>
+      <network_name>地上デジタル</network_name>
+      <ts_name>NHKラジオ第1</ts_name>
+      <remote_control_key_id>0</remote_control_key_id>
+    </serviceinfo>
+  </items>
+</entry>

@@ -13,12 +13,18 @@ import (
 type MockEMWUIServer struct {
 	Server *httptest.Server
 	// Callbacks for custom behavior
-	OnSetAutoAdd  func(values map[string][]string) (success bool, message string)
-	OnEnumAutoAdd func() (xmlResponse string, statusCode int)
+	OnSetAutoAdd      func(values map[string][]string) (success bool, message string)
+	OnEnumAutoAdd     func() (xmlResponse string, statusCode int)
+	OnEnumService     func() (xmlResponse string, statusCode int)
+	OnEnumReserveInfo func() (xmlResponse string, statusCode int)
+	OnEnumRecInfo     func() (xmlResponse string, statusCode int)
 	// CSRF token to return in HTML page
 	CToken string
-	// EnumAutoAdd response mode
-	EnumAutoAddEmpty bool // If true, return empty response
+	// Response mode flags
+	EnumAutoAddEmpty     bool // If true, return empty response
+	EnumServiceEmpty     bool
+	EnumReserveInfoEmpty bool
+	EnumRecInfoEmpty     bool
 }
 
 // NewMockEMWUIServer creates a new mock EMWUI server
@@ -70,30 +76,91 @@ func NewMockEMWUIServer() *MockEMWUIServer {
 				filename = "enumautoadd_success.xml"
 			}
 
-			// Try multiple possible paths for fixture files
-			var xmlData []byte
-			var err error
-			possiblePaths := []string{
-				filepath.Join("responses", filename),
-				filepath.Join("testdata", "responses", filename),
-				filepath.Join("tests", "testdata", "responses", filename),
-				filepath.Join("..", "testdata", "responses", filename),
-			}
+			mock.serveFixture(w, filename)
+			return
+		}
 
-			for _, path := range possiblePaths {
-				xmlData, err = os.ReadFile(path)
-				if err == nil {
-					break
-				}
-			}
-
-			if err != nil {
-				http.Error(w, fmt.Sprintf("Failed to read fixture: %v", err), http.StatusInternalServerError)
+		// Handle EnumService endpoint (GET /api/EnumService)
+		if r.URL.Path == "/api/EnumService" {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 				return
 			}
 
-			w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-			w.Write(xmlData)
+			// Call custom handler if set
+			if mock.OnEnumService != nil {
+				xmlResp, statusCode := mock.OnEnumService()
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				w.WriteHeader(statusCode)
+				fmt.Fprint(w, xmlResp)
+				return
+			}
+
+			// Default behavior: load from fixtures
+			var filename string
+			if mock.EnumServiceEmpty {
+				filename = "enumservice_empty.xml"
+			} else {
+				filename = "enumservice_success.xml"
+			}
+
+			mock.serveFixture(w, filename)
+			return
+		}
+
+		// Handle EnumReserveInfo endpoint (GET /api/EnumReserveInfo)
+		if r.URL.Path == "/api/EnumReserveInfo" {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Call custom handler if set
+			if mock.OnEnumReserveInfo != nil {
+				xmlResp, statusCode := mock.OnEnumReserveInfo()
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				w.WriteHeader(statusCode)
+				fmt.Fprint(w, xmlResp)
+				return
+			}
+
+			// Default behavior: load from fixtures
+			var filename string
+			if mock.EnumReserveInfoEmpty {
+				filename = "enumreserveinfo_empty.xml"
+			} else {
+				filename = "enumreserveinfo_success.xml"
+			}
+
+			mock.serveFixture(w, filename)
+			return
+		}
+
+		// Handle EnumRecInfo endpoint (GET /api/EnumRecInfo)
+		if r.URL.Path == "/api/EnumRecInfo" {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Call custom handler if set
+			if mock.OnEnumRecInfo != nil {
+				xmlResp, statusCode := mock.OnEnumRecInfo()
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				w.WriteHeader(statusCode)
+				fmt.Fprint(w, xmlResp)
+				return
+			}
+
+			// Default behavior: load from fixtures
+			var filename string
+			if mock.EnumRecInfoEmpty {
+				filename = "enumrecinfo_empty.xml"
+			} else {
+				filename = "enumrecinfo_success.xml"
+			}
+
+			mock.serveFixture(w, filename)
 			return
 		}
 
@@ -192,4 +259,68 @@ func NewEmptyEnumAutoAddServer() *MockEMWUIServer {
 // SetEnumAutoAddHandler sets a custom handler for EnumAutoAdd requests
 func (m *MockEMWUIServer) SetEnumAutoAddHandler(handler func() (xmlResponse string, statusCode int)) {
 	m.OnEnumAutoAdd = handler
+}
+
+// SetEnumServiceHandler sets a custom handler for EnumService requests
+func (m *MockEMWUIServer) SetEnumServiceHandler(handler func() (xmlResponse string, statusCode int)) {
+	m.OnEnumService = handler
+}
+
+// SetEnumReserveInfoHandler sets a custom handler for EnumReserveInfo requests
+func (m *MockEMWUIServer) SetEnumReserveInfoHandler(handler func() (xmlResponse string, statusCode int)) {
+	m.OnEnumReserveInfo = handler
+}
+
+// SetEnumRecInfoHandler sets a custom handler for EnumRecInfo requests
+func (m *MockEMWUIServer) SetEnumRecInfoHandler(handler func() (xmlResponse string, statusCode int)) {
+	m.OnEnumRecInfo = handler
+}
+
+// serveFixture loads and serves an XML fixture file
+func (m *MockEMWUIServer) serveFixture(w http.ResponseWriter, filename string) {
+	// Try multiple possible paths for fixture files
+	var xmlData []byte
+	var err error
+	possiblePaths := []string{
+		filepath.Join("responses", filename),
+		filepath.Join("testdata", "responses", filename),
+		filepath.Join("tests", "testdata", "responses", filename),
+		filepath.Join("..", "testdata", "responses", filename),
+	}
+
+	for _, path := range possiblePaths {
+		xmlData, err = os.ReadFile(path)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read fixture: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+	w.Write(xmlData)
+}
+
+// NewEmptyEnumServiceServer creates a mock server that returns empty EnumService response
+func NewEmptyEnumServiceServer() *MockEMWUIServer {
+	mock := NewMockEMWUIServer()
+	mock.EnumServiceEmpty = true
+	return mock
+}
+
+// NewEmptyEnumReserveInfoServer creates a mock server that returns empty EnumReserveInfo response
+func NewEmptyEnumReserveInfoServer() *MockEMWUIServer {
+	mock := NewMockEMWUIServer()
+	mock.EnumReserveInfoEmpty = true
+	return mock
+}
+
+// NewEmptyEnumRecInfoServer creates a mock server that returns empty EnumRecInfo response
+func NewEmptyEnumRecInfoServer() *MockEMWUIServer {
+	mock := NewMockEMWUIServer()
+	mock.EnumRecInfoEmpty = true
+	return mock
 }
