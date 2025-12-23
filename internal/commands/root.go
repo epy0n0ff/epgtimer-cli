@@ -44,6 +44,7 @@ func init() {
 	rootCmd.AddCommand(channelsCmd)
 	rootCmd.AddCommand(reservationsCmd)
 	rootCmd.AddCommand(recordingsCmd)
+	rootCmd.AddCommand(epgCmd)
 }
 
 // GetEMWUIEndpoint returns the EMWUI endpoint from flag or environment variable

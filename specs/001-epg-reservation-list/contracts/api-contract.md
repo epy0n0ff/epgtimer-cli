@@ -464,5 +464,155 @@ if err := xml.Unmarshal(body, &response); err != nil {
 - GET /api/EnumService: List available channels
 - GET /api/EnumReserveInfo: List manual reservations
 - GET /api/EnumRecInfo: List recorded programs
+- GET /api/EnumEventInfo: Retrieve EPG (Electronic Program Guide) data
 
 **Note**: This feature focuses only on EnumAutoAdd for automatic recording rules.
+
+## EnumEventInfo API (GET /api/EnumEventInfo)
+
+### Endpoint Overview
+
+**Purpose**: Retrieve EPG (Electronic Program Guide) data for a specific channel
+
+**Full URL**: `{EMWUI_ENDPOINT}/api/EnumEventInfo?ONID={ONID}&TSID={TSID}&SID={SID}&basic=0&count=1000`
+
+**HTTP Method**: GET
+
+**Authentication**: None required
+
+**Content-Type**: text/xml; charset=UTF-8
+
+### Request Parameters
+
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| ONID | integer | Yes | Original Network ID | 32736 |
+| TSID | integer | Yes | Transport Stream ID | 32736 |
+| SID | integer | Yes | Service ID | 1024 |
+| basic | integer | No | Basic mode flag (0=detailed) | 0 |
+| count | integer | No | Maximum events to return | 1000 |
+
+### Response Structure
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<entry>
+  <total>539</total>
+  <index>0</index>
+  <count>10</count>
+  <items>
+    <eventinfo>
+      <ONID>32736</ONID>
+      <TSID>32736</TSID>
+      <SID>1024</SID>
+      <eventID>7323</eventID>
+      <service_name>ＮＨＫ総合１・東京</service_name>
+      <startDate>2025/12/23</startDate>
+      <startTime>06:00:00</startTime>
+      <startDayOfWeek>2</startDayOfWeek>
+      <duration>1800</duration>
+      <event_name>ＮＨＫニュース　おはよう日本</event_name>
+      <event_text>番組の概要説明</event_text>
+      <contentInfo>
+        <nibble1>0</nibble1>
+        <nibble2>0</nibble2>
+        <component_type_name>ニュース／報道 - 定時・総合</component_type_name>
+      </contentInfo>
+      <freeCAFlag>0</freeCAFlag>
+      <event_ext_text>番組の詳細説明</event_ext_text>
+    </eventinfo>
+    <!-- ... more eventinfo entries ... -->
+  </items>
+</entry>
+```
+
+### Data Model
+
+#### EventInfo Element: `<eventinfo>`
+
+| Field | Type | Description | Constraints |
+|-------|------|-------------|-------------|
+| `<ONID>` | integer | Original Network ID | > 0 |
+| `<TSID>` | integer | Transport Stream ID | > 0 |
+| `<SID>` | integer | Service ID | > 0 |
+| `<eventID>` | integer | Event identifier | > 0 |
+| `<service_name>` | string | Channel/service name (UTF-8) | Any string |
+| `<startDate>` | string | Start date (YYYY/MM/DD) | Date format |
+| `<startTime>` | string | Start time (HH:MM:SS) | Time format |
+| `<startDayOfWeek>` | integer | Day of week (0=Sun, 1=Mon, ...) | 0-6 |
+| `<duration>` | integer | Duration in seconds | >= 0 |
+| `<event_name>` | string | Program title (UTF-8) | Any string |
+| `<event_text>` | string | Program description (UTF-8) | Any string |
+| `<event_ext_text>` | string | Extended description (UTF-8) | Any string |
+| `<freeCAFlag>` | integer | 0=free, 1=scrambled | 0 or 1 |
+| `<contentInfo>` | container | Genre information (repeatable) | 0..* contentInfo |
+
+#### ContentInfo Element: `<contentInfo>` (Repeatable)
+
+| Field | Type | Description | Constraints |
+|-------|------|-------------|-------------|
+| `<nibble1>` | integer | Genre main category | 0-15 |
+| `<nibble2>` | integer | Genre sub category | 0-15 |
+| `<component_type_name>` | string | Human-readable genre name (UTF-8) | Any string |
+
+### Character Encoding
+
+**Encoding**: UTF-8
+
+**Japanese Characters**: Fully supported in all string fields
+
+**Examples**:
+- `<event_name>ＮＨＫニュース　おはよう日本</event_name>`
+- `<service_name>ＮＨＫ総合１・東京</service_name>`
+
+### Performance Characteristics
+
+#### Response Time
+
+- **Typical** (30-100 events): 100-500ms
+- **Large** (500-1000 events): 500ms-2s
+
+#### Response Size
+
+- **Typical** (100 events): 100-300 KB
+- **Large** (1000 events): 1-3 MB
+
+### Error Responses
+
+#### EPG Data Not Available
+
+**Scenario**: EPG data is still loading or not available for the channel
+
+**Response**:
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<entry><err>EPGデータを読み込み中、または存在しません</err></entry>
+```
+
+#### Invalid Channel
+
+**Scenario**: ONID/TSID/SID combination does not exist
+
+**Response**: Empty response (total=0, count=0)
+
+### Usage Example
+
+```bash
+# Retrieve EPG for NHK (ONID=32736, TSID=32736, SID=1024)
+curl "http://192.168.1.10:5510/api/EnumEventInfo?ONID=32736&TSID=32736&SID=1024&basic=0&count=1000"
+```
+
+### CLI Integration
+
+The `epg` command uses this API to retrieve program schedule data:
+
+```bash
+# View EPG for a specific channel
+epgtimer epg --channel "32736-32736-1024"
+
+# View EPG for all channels
+epgtimer epg --all-channels
+
+# Filter by title
+epgtimer epg --channel "32736-32736-1024" --title "ニュース"
+```

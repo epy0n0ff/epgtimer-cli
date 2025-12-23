@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<entry>
+  <total>3</total>
+  <index>0</index>
+  <count>3</count>
+  <items>
+    <eventinfo>
+      <ONID>32736</ONID>
+      <TSID>32736</TSID>
+      <SID>1024</SID>
+      <eventID>7323</eventID>
+      <service_name>ＮＨＫ総合１・東京</service_name>
+      <startDate>2025/12/23</startDate>
+      <startTime>06:00:00</startTime>
+      <startDayOfWeek>2</startDayOfWeek>
+      <duration>1800</duration>
+      <event_name>ＮＨＫニュース　おはよう日本　テスト</event_name>
+      <event_text>テスト番組の説明文です。</event_text>
+      <contentInfo>
+        <nibble1>0</nibble1>
+        <nibble2>0</nibble2>
+        <component_type_name>ニュース／報道 - 定時・総合</component_type_name>
+      </contentInfo>
+      <freeCAFlag>0</freeCAFlag>
+      <event_ext_text>テスト番組の詳細説明です。</event_ext_text>
+    </eventinfo>
+    <eventinfo>
+      <ONID>32736</ONID>
+      <TSID>32736</TSID>
+      <SID>1024</SID>
+      <eventID>7331</eventID>
+      <service_name>ＮＨＫ総合１・東京</service_name>
+      <startDate>2025/12/23</startDate>
+      <startTime>08:00:00</startTime>
+      <startDayOfWeek>2</startDayOfWeek>
+      <duration>900</duration>
+      <event_name>【連続テレビ小説】ばけばけ（６２）</event_name>
+      <event_text>テレビドラマの説明文です。</event_text>
+      <contentInfo>
+        <nibble1>3</nibble1>
+        <nibble2>0</nibble2>
+        <component_type_name>ドラマ - 国内ドラマ</component_type_name>
+      </contentInfo>
+      <freeCAFlag>0</freeCAFlag>
+      <event_ext_text>テレビドラマの詳細説明です。</event_ext_text>
+    </eventinfo>
+    <eventinfo>
+      <ONID>32736</ONID>
+      <TSID>32736</TSID>
+      <SID>1024</SID>
+      <eventID>7332</eventID>
+      <service_name>ＮＨＫ総合１・東京</service_name>
+      <startDate>2025/12/23</startDate>
+      <startTime>08:15:00</startTime>
+      <startDayOfWeek>2</startDayOfWeek>
+      <duration>6000</duration>
+      <event_name>あさイチ　テスト番組</event_name>
+      <event_text>情報番組の説明文です。</event_text>
+      <contentInfo>
+        <nibble1>2</nibble1>
+        <nibble2>2</nibble2>
+        <component_type_name>情報／ワイドショー - 暮らし・住まい</component_type_name>
+      </contentInfo>
+      <freeCAFlag>0</freeCAFlag>
+      <event_ext_text>情報番組の詳細説明です。</event_ext_text>
+    </eventinfo>
+  </items>
+</entry>
