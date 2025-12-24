@@ -9,6 +9,7 @@ Command-line interface for EpgTimer's EMWUI to manage automatic recording rules 
 - View available channels with filtering by type and network
 - List manual reservations with filtering
 - Browse recorded programs with filtering
+- View EPG (Electronic Program Guide) for channels
 - Export to JSON, CSV, or TSV format
 - Support for Japanese keywords and channel names
 - Exclusion keywords to filter out unwanted programs
@@ -273,6 +274,48 @@ epgtimer recordings --format json --output recordings.json
 epgtimer recordings --format csv -o recordings.csv
 ```
 
+#### View EPG (Program Guide)
+
+View EPG (Electronic Program Guide) data for channels:
+
+```bash
+epgtimer epg [flags]
+```
+
+**Channel Selection**:
+- `--channel`: Specific channel in ONID-TSID-SID format
+- `--all-channels`: Retrieve EPG for all channels from serviceList_without_local.txt
+
+**Filter Options**:
+- `--title`: Filter by program title (substring match, case-insensitive)
+- `--genre`: Filter by genre (substring match, case-insensitive)
+
+**Export Options**:
+- `--format`: Output format - table (default), json, csv, tsv
+- `-o, --output`: Output file path (default: stdout)
+
+**Examples**:
+
+```bash
+# View EPG for a specific channel
+epgtimer epg --channel "32736-32736-1024"
+
+# View EPG for all channels
+epgtimer epg --all-channels
+
+# Filter by title
+epgtimer epg --channel "32736-32736-1024" --title "ニュース"
+
+# Filter by genre
+epgtimer epg --channel "32736-32736-1024" --genre "ドラマ"
+
+# Export to JSON file
+epgtimer epg --channel "32736-32736-1024" --format json --output epg.json
+
+# Export all channels to CSV
+epgtimer epg --all-channels --format csv -o epg.csv
+```
+
 ## Common Channel IDs (Tokyo Area)
 
 | Channel | ONID-TSID-SID |
@@ -303,6 +346,7 @@ epgtimer list --help
 epgtimer channels --help
 epgtimer reservations --help
 epgtimer recordings --help
+epgtimer epg --help
 epgtimer --version
 ```
 
@@ -389,6 +433,7 @@ epgtimer-cli/
   - EMWUI EnumService - List available channels/services
   - EMWUI EnumReserveInfo - List manual recording reservations
   - EMWUI EnumRecInfo - List recorded programs (paginated)
+  - EMWUI EnumEventInfo - Retrieve EPG (program guide) data
 - **Character Encoding**: UTF-8 (automatic URL encoding)
 - **HTTP Timeout**: 10 seconds
 - **CSRF Protection**: Automatically fetches ctok token from `/EMWUI/autoaddepg.html` before each request
@@ -413,5 +458,5 @@ Contributions are welcome! Please ensure:
 
 ---
 
-**Version**: 0.3.0
-**Last Updated**: 2025-12-22
+**Version**: 0.4.0
+**Last Updated**: 2025-12-23

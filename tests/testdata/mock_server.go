@@ -18,6 +18,7 @@ type MockEMWUIServer struct {
 	OnEnumService     func() (xmlResponse string, statusCode int)
 	OnEnumReserveInfo func() (xmlResponse string, statusCode int)
 	OnEnumRecInfo     func() (xmlResponse string, statusCode int)
+	OnEnumEventInfo   func() (xmlResponse string, statusCode int)
 	// CSRF token to return in HTML page
 	CToken string
 	// Response mode flags
@@ -25,6 +26,7 @@ type MockEMWUIServer struct {
 	EnumServiceEmpty     bool
 	EnumReserveInfoEmpty bool
 	EnumRecInfoEmpty     bool
+	EnumEventInfoEmpty   bool
 }
 
 // NewMockEMWUIServer creates a new mock EMWUI server
@@ -158,6 +160,34 @@ func NewMockEMWUIServer() *MockEMWUIServer {
 				filename = "enumrecinfo_empty.xml"
 			} else {
 				filename = "enumrecinfo_success.xml"
+			}
+
+			mock.serveFixture(w, filename)
+			return
+		}
+
+		// Handle EnumEventInfo endpoint (GET /api/EnumEventInfo)
+		if r.URL.Path == "/api/EnumEventInfo" {
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Call custom handler if set
+			if mock.OnEnumEventInfo != nil {
+				xmlResp, statusCode := mock.OnEnumEventInfo()
+				w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+				w.WriteHeader(statusCode)
+				fmt.Fprint(w, xmlResp)
+				return
+			}
+
+			// Default behavior: load from fixtures
+			var filename string
+			if mock.EnumEventInfoEmpty {
+				filename = "enumeventinfo_empty.xml"
+			} else {
+				filename = "enumeventinfo_success.xml"
 			}
 
 			mock.serveFixture(w, filename)
@@ -322,5 +352,17 @@ func NewEmptyEnumReserveInfoServer() *MockEMWUIServer {
 func NewEmptyEnumRecInfoServer() *MockEMWUIServer {
 	mock := NewMockEMWUIServer()
 	mock.EnumRecInfoEmpty = true
+	return mock
+}
+
+// SetEnumEventInfoHandler sets a custom handler for EnumEventInfo requests
+func (m *MockEMWUIServer) SetEnumEventInfoHandler(handler func() (xmlResponse string, statusCode int)) {
+	m.OnEnumEventInfo = handler
+}
+
+// NewEmptyEnumEventInfoServer creates a mock server that returns empty EnumEventInfo response
+func NewEmptyEnumEventInfoServer() *MockEMWUIServer {
+	mock := NewMockEMWUIServer()
+	mock.EnumEventInfoEmpty = true
 	return mock
 }
