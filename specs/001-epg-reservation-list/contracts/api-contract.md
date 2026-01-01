@@ -459,6 +459,28 @@ if err := xml.Unmarshal(body, &response); err != nil {
 - **Auth**: Requires CSRF token (ctok) from HTML page
 - **Note**: Different from EnumAutoAdd (GET, no auth)
 
+### DeleteAutoAdd (POST /api/SetAutoAdd with del=1)
+
+- **Purpose**: Delete an existing automatic recording rule
+- **Method**: POST /api/SetAutoAdd?id={rule_id}
+- **Auth**: Requires CSRF token (ctok) from HTML page
+- **Request Body**: `del=1&ctok={csrf_token}`
+- **Example Request**:
+  ```bash
+  curl 'http://192.168.1.10:5510/api/SetAutoAdd?id=334' \
+    -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+    --data-raw 'del=1&ctok=26aa1285b9c974a95d31718a1d0f17bb'
+  ```
+- **Success Response**:
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?><entry><success>EPG自動予約を削除しました</success></entry>
+  ```
+- **Error Response**:
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?><entry><err>エラーメッセージ</err></entry>
+  ```
+- **Note**: Uses the same SetAutoAdd endpoint as create/update, but with `del=1` parameter
+
 ### Other EMWUI APIs
 
 - GET /api/EnumService: List available channels

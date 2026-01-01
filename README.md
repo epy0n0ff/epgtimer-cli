@@ -5,6 +5,7 @@ Command-line interface for EpgTimer's EMWUI to manage automatic recording rules 
 ## Features
 
 - Add automatic recording rules based on search keywords
+- Delete automatic recording rules by ID
 - List and filter existing recording rules
 - View available channels with filtering by type and network
 - List manual reservations with filtering
@@ -104,6 +105,39 @@ epgtimer add \
   --notKey "推しエンタ" \
   --serviceList "32736-32736-1024,32736-32736-1025"
 ```
+
+#### Delete Recording Rule
+
+Delete an existing automatic recording rule by its ID:
+
+```bash
+epgtimer delete [rule-id]
+```
+
+**Arguments**:
+- `rule-id` (required): The ID of the recording rule to delete
+
+**Options**:
+- `--id`: Alternative way to specify the rule ID
+- `--endpoint` (optional): Override EMWUI_ENDPOINT environment variable
+
+**Examples**:
+
+```bash
+# First, list rules to find the ID
+epgtimer list
+
+# Delete rule with ID 334 (using positional argument)
+epgtimer delete 334
+
+# Delete rule using --id flag
+epgtimer delete --id 334
+
+# Delete rule with custom endpoint
+epgtimer delete --endpoint http://192.168.1.10:5510 334
+```
+
+**Note**: Use `epgtimer list` to find the rule IDs you want to delete.
 
 #### List Recording Rules
 
@@ -342,6 +376,7 @@ View all available options:
 ```bash
 epgtimer --help
 epgtimer add --help
+epgtimer delete --help
 epgtimer list --help
 epgtimer channels --help
 epgtimer reservations --help
