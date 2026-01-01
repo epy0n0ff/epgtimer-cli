@@ -14,6 +14,7 @@ type MockEMWUIServer struct {
 	Server *httptest.Server
 	// Callbacks for custom behavior
 	OnSetAutoAdd      func(values map[string][]string) (success bool, message string)
+	OnDeleteAutoAdd   func(id int) (success bool, message string)
 	OnEnumAutoAdd     func() (xmlResponse string, statusCode int)
 	OnEnumService     func() (xmlResponse string, statusCode int)
 	OnEnumReserveInfo func() (xmlResponse string, statusCode int)
@@ -218,19 +219,45 @@ func NewMockEMWUIServer() *MockEMWUIServer {
 			values[key] = vals
 		}
 
+		// Check if this is a delete request (del=1)
+		isDel := len(values["del"]) > 0 && values["del"][0] == "1"
+
 		// Call custom handler if set
 		var success bool
 		var message string
-		if mock.OnSetAutoAdd != nil {
-			success, message = mock.OnSetAutoAdd(values)
-		} else {
-			// Default: success if andKey and serviceList are present
-			success = len(values["andKey"]) > 0 && values["andKey"][0] != "" &&
-				len(values["serviceList"]) > 0
-			if success {
-				message = "Automatic recording rule created successfully"
+		if isDel {
+			// Handle delete request
+			// Extract ID from query parameter
+			id := 0
+			if idStr := r.URL.Query().Get("id"); idStr != "" {
+				fmt.Sscanf(idStr, "%d", &id)
+			}
+
+			if mock.OnDeleteAutoAdd != nil {
+				success, message = mock.OnDeleteAutoAdd(id)
 			} else {
-				message = "Missing required parameters"
+				// Default: success if ID > 0
+				if id > 0 {
+					success = true
+					message = "Automatic recording rule deleted successfully"
+				} else {
+					success = false
+					message = "Invalid rule ID"
+				}
+			}
+		} else {
+			// Handle add/update request
+			if mock.OnSetAutoAdd != nil {
+				success, message = mock.OnSetAutoAdd(values)
+			} else {
+				// Default: success if andKey and serviceList are present
+				success = len(values["andKey"]) > 0 && values["andKey"][0] != "" &&
+					len(values["serviceList"]) > 0
+				if success {
+					message = "Automatic recording rule created successfully"
+				} else {
+					message = "Missing required parameters"
+				}
 			}
 		}
 
@@ -259,6 +286,11 @@ func (m *MockEMWUIServer) URL() string {
 // SetAutoAddHandler sets a custom handler for SetAutoAdd requests
 func (m *MockEMWUIServer) SetAutoAddHandler(handler func(values map[string][]string) (success bool, message string)) {
 	m.OnSetAutoAdd = handler
+}
+
+// SetDeleteAutoAddHandler sets a custom handler for delete requests
+func (m *MockEMWUIServer) SetDeleteAutoAddHandler(handler func(id int) (success bool, message string)) {
+	m.OnDeleteAutoAdd = handler
 }
 
 // NewFailingServer creates a mock server that always returns errors
